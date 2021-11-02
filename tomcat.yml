@@ -1,0 +1,47 @@
+--- # playbook for tomcat
+- name: web status
+  hosts: hosts
+  become: yes
+  vars:
+    java: java-1.8*
+  tasks:
+    - name: install git ,java,wget 
+      yum: 
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      with_items:
+        - git
+        - "{{ java }}"
+        - wget
+        - epel-release
+        - maven        
+        
+    - name:
+      get_url: 
+        url: https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.54/bin/apache-tomcat-9.0.54.tar.gz
+        dest: /home/centos 
+        validate_certs: no
+        
+        
+    - name: extrate tomcat-9    
+      unarchive: 
+        src: /home/centos/apache-tomcat-9.0.54.tar.gz
+        dest: /home/centos
+        remote_src: yes
+
+    - name: to start tomcat-9
+      shell: ' nohup /home/centos/apache-tomcat-9.0.54/bin/startup.sh &'
+      register: command_start
+
+    - debug: 
+        var: 'command_start.stdout_lines'
+
+    - name: statusi
+      shell: " sudo netstat -ntpl | grep 8080 "
+      register: status
+    - debug: 
+        var: 'status.stdout_lines'
+        
+        
+...
